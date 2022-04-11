@@ -1,21 +1,20 @@
-package ru.spbu.phys.bdc.api.model.executor;
+package ru.spbu.phys.cph.bdc.taskmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.spbu.phys.bdc.api.model.RunnerParameter;
+import ru.spbu.phys.bdc.api.model.executor.CommandType;
 
 import java.util.List;
 
-@Data
-@Builder
+@Getter
+@NoArgsConstructor
 @AllArgsConstructor
-public class RunnerCommand {
+public class FrontendCommand {
+    private String nodeName;
     private CommandType commandType;
-
-    private String taskName;
-
     private List<RunnerParameter> parameters;
 
     @JsonIgnore

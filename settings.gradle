@@ -2,4 +2,5 @@ rootProject.name = 'bmnMook'
 include 'BDC_Runner'
 include 'BDC_API'
 include 'BDC_TaskManagerMook'
+include 'BDC_TaskManager'
 

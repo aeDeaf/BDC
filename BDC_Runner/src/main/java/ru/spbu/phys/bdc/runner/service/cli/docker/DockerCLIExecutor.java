@@ -99,6 +99,18 @@ public class DockerCLIExecutor {
         exec(command);
     }
 
+    public CompletableFuture<String> dockerPS(String containerNamePrefix) {
+        Command command = Command
+                .createCommand()
+                .addCommand("docker")
+                .addCommand("ps")
+                .addCommand("--all")
+                .addCommand("|")
+                .addCommand("grep")
+                .addCommand("\"" + containerNamePrefix + "*\"");
+        return exec(command);
+    }
+
     @SneakyThrows
     public CompletableFuture<String> exec(Command command) {
         return commandsService.addCommandToQueue(command);

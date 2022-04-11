@@ -1,7 +1,6 @@
-package ru.spbu.phys.bdc.runner.model.docker;
+package ru.spbu.phys.bdc.api.model.result.docker;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 
 @Getter

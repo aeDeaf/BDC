@@ -10,6 +10,8 @@ import ru.spbu.phys.bdc.api.model.executor.CommandType;
 import ru.spbu.phys.bdc.api.model.executor.RunnerCommand;
 import ru.spbu.phys.bdc.api.model.result.CommandExecuteStatus;
 import ru.spbu.phys.bdc.api.model.result.CommandExecuteStatusMessage;
+import ru.spbu.phys.bdc.api.model.result.docker.DockerContainerInfo;
+import ru.spbu.phys.bdc.api.model.result.docker.DockerContainersInfos;
 import ru.spbu.phys.bdc.runner.model.configuration.Properties;
 import ru.spbu.phys.bdc.runner.model.db.ContainerInfo;
 import ru.spbu.phys.bdc.runner.service.TaskManagerService;
@@ -61,6 +63,8 @@ public class BmnDockerService implements TaskObserver {
             runContainer(command);
         } else if (command.getCommandType() == CommandType.STOP_CONTAINER) {
             stopContainer(command);
+        } else if (command.getCommandType() == CommandType.GET_CONTAINERS_STATUSES) {
+            getContainerStatuses(command);
         }
     }
 
@@ -114,8 +118,13 @@ public class BmnDockerService implements TaskObserver {
                 });
     }
 
+    private void getContainerStatuses(RunnerCommand command) {
+        executor.dockerPS(CONTAINER_NAME_PREFIX)
+                .thenAccept(this::processDockerPsResults);
+    }
+
     private List<String> processLogData(String logData) {
-        List<String> logDataList = Arrays.asList(logData.split("\n")).subList(0, 2);
+        var logDataList = Arrays.asList(logData.split("\n")).subList(0, 2);
         return logDataList
                 .stream()
                 .map(line -> line.split(": ")[1])
@@ -163,16 +172,38 @@ public class BmnDockerService implements TaskObserver {
     }
 
     private String processIPData(String ipData) {
-        List<String> ipDataLines = Arrays.stream(ipData.split("\n"))
+        var ipDataLines = Arrays.stream(ipData.split("\n"))
                 .map(String::trim)
-                .collect(Collectors.toList());
-        for (String line : ipDataLines) {
+                .toList();
+        for (var line : ipDataLines) {
             if (line.startsWith("\"IPAddress\"")) {
                 String ipAddress = line.split(": ")[1];
                 return ipAddress.substring(1, ipAddress.length() - 2);
             }
         }
         return null;
+    }
+
+    private void processDockerPsResults(String result) {
+        var containerInfosLines = Arrays.asList(result.split("\n"));
+        var containerInfoList = containerInfosLines
+                .stream()
+                .map(this::createDockerContainerInfo)
+                .toList();
+        DockerContainersInfos containersInfos = new DockerContainersInfos(containerInfoList);
+        taskManagerService.sendContainerInfos(containersInfos);
+    }
+
+    private DockerContainerInfo createDockerContainerInfo(String line) {
+        var splitLine = line.split("\s{2,}");
+        var length = splitLine.length;
+        return DockerContainerInfo
+                .builder()
+                .containerId(splitLine[0])
+                .image(splitLine[1])
+                .status(DockerContainerInfo.DockerContainerStatus.getStatusFromString(splitLine[4]))
+                .name(splitLine[length - 1])
+                .build();
     }
 
     private void sendSuccessStatus(RunnerCommand command, String result) {
