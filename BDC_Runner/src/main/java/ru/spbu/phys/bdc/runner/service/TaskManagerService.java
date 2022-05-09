@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -27,13 +25,6 @@ public class TaskManagerService {
     public static final String STATUS_URL = "http://localhost:8080/status";
     public static final String CONTAINER_INFOS_URL = "http://localhost:8080/status";
     public static final String GET_COMMAND_URL = "http://127.0.0.1:8090/command";
-
-    private static ClientHttpRequestFactory getClientHttpRequestFactory() {
-        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-        clientHttpRequestFactory.setConnectTimeout(2000);
-        clientHttpRequestFactory.setReadTimeout(100);
-        return clientHttpRequestFactory;
-    }
 
     private final Properties properties;
 

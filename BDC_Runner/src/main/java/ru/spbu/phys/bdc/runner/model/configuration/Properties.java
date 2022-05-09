@@ -9,4 +9,6 @@ public class Properties {
     private String nodeName;
 
     private int requestsDelta;
+
+    private int healthCheckDelta;
 }

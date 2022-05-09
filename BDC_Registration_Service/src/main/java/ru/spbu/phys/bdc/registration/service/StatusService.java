@@ -33,7 +33,8 @@ public class StatusService {
         var statuses = statusRepository.findStatuses();
         for (var status : statuses) {
             Instant timestamp = status.timestamp();
-            if ((timestamp.getEpochSecond() + configuration.getHealthCheckPeriod() - Instant.now().getEpochSecond()) < 0) {
+            long timestampDelta = timestamp.getEpochSecond() + configuration.getHealthCheckPeriod() - Instant.now().getEpochSecond();
+            if (status.status() == Status.ONLINE && timestampDelta < 0) {
                 setStatus(status.nodeName(), Status.OFFLINE);
             }
         }

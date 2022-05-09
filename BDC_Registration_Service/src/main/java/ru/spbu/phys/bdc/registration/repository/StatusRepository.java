@@ -53,11 +53,11 @@ public class StatusRepository extends JdbcDaoSupport {
     }
 
     public void updateStatus(NodeStatus status) {
-        jdbcTemplate.update(INSERT_STATUS, status.nodeName(), status.status().ordinal(), status.timestamp().toEpochMilli());
+        jdbcTemplate.update(INSERT_STATUS, status.nodeName(), status.status().ordinal(), status.timestamp().getEpochSecond());
     }
 
     public void updateTimestamp(NodeStatus status) {
-        jdbcTemplate.update(UPDATE_TIMESTAMP, status.timestamp().toEpochMilli(), status.nodeName());
+        jdbcTemplate.update(INSERT_STATUS, status.nodeName(), status.status().ordinal(), status.timestamp().getEpochSecond());
     }
 
     public List<NodeStatus> findStatuses() {
@@ -68,7 +68,7 @@ public class StatusRepository extends JdbcDaoSupport {
         try {
             String nodeName = rs.getString("nodename");
             Status status = Status.values()[rs.getInt("status")];
-            Instant timestamp = Instant.ofEpochMilli(rs.getLong("timestamp"));
+            Instant timestamp = Instant.ofEpochSecond(rs.getLong("timestamp"));
             return new NodeStatus(nodeName, status, timestamp);
         } catch (SQLException e) {
             log.error("Can't create node status", e);
