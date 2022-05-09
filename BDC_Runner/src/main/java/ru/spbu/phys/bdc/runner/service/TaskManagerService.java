@@ -1,12 +1,9 @@
 package ru.spbu.phys.bdc.runner.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -24,11 +21,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 public class TaskManagerService {
     public static final String STATUS_URL = "http://localhost:8080/status";
     public static final String CONTAINER_INFOS_URL = "http://localhost:8080/status";
-    public static final String GET_COMMAND_URL = "http://127.0.0.1:8080/command";
+    public static final String GET_COMMAND_URL = "http://127.0.0.1:8090/command";
 
     private static ClientHttpRequestFactory getClientHttpRequestFactory() {
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
@@ -65,6 +63,7 @@ public class TaskManagerService {
             ResponseEntity<RunnerCommand> response = restTemplate.exchange(url, HttpMethod.GET, entity, RunnerCommand.class);
             RunnerCommand command = response.getBody();
             if (command != null && command.getCommandType() != null && command.getTaskName() != null) {
+                log.info("Received new command {}", command.getCommandType());
                 observers
                         .forEach(observer -> observer.processCommand(command));
             }

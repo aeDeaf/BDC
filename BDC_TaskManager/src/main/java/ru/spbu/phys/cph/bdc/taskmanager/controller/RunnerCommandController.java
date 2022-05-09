@@ -11,7 +11,7 @@ import ru.spbu.phys.bdc.api.model.executor.RunnerCommand;
 import ru.spbu.phys.cph.bdc.taskmanager.service.RunnerCommandQueueService;
 
 @RestController
-@RequestMapping("/controller")
+@RequestMapping("/command")
 public class RunnerCommandController {
     private final RunnerCommandQueueService queueService;
 

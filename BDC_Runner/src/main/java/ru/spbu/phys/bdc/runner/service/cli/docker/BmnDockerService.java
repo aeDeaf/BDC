@@ -6,6 +6,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.spbu.phys.bdc.api.model.executor.CommandType;
 import ru.spbu.phys.bdc.api.model.executor.RunnerCommand;
 import ru.spbu.phys.bdc.api.model.result.CommandExecuteStatus;
@@ -33,7 +34,7 @@ public class BmnDockerService implements TaskObserver {
 
     public static final String CREATE_INIT_SH_TEMPLATE =
             "printf \"export DISPLAY=%s source /opt/bmnroot/install/bmnroot_config.sh\" > init.sh";
-    public static final String SSH_CONNECT_COMMAND_TEMPLATE = "sshpass -p %s ssh %s@%s";
+    public static final String SSH_CONNECT_COMMAND_TEMPLATE = "sshpass -p %s ssh -o \"StrictHostKeyChecking=no\" -o \"UserKnownHostsFile=/dev/null\" %s@%s";
 
     private final DockerCLIExecutor executor;
     private final TaskManagerService taskManagerService;
@@ -84,6 +85,10 @@ public class BmnDockerService implements TaskObserver {
                 .max(Long::compareTo)
                 .orElse(0L);
         String containerName = CONTAINER_NAME_PREFIX + maxContainerInfoID;
+        if (!StringUtils.hasLength(containerName) || !StringUtils.hasLength(imageName)) {
+            log.error("Error while processing CREATE_CONTAINER command");
+            return;
+        }
         executor.runContainer(imageName, containerName)
                 .thenAccept(result -> {
                     executor.getContainerUsernameAndPassword(containerName)
