@@ -1,9 +1,9 @@
-package ru.spbu.phys.cph.bdc.taskmanager.service;
+package ru.spbu.phys.cph.bdc.taskmanager.service.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.spbu.phys.bdc.api.model.executor.RunnerCommand;
-import ru.spbu.phys.cph.bdc.taskmanager.model.FrontendCommand;
+import ru.spbu.phys.cph.bdc.taskmanager.model.command.FrontendCommand;
 
 @Service
 public class FrontendCommandService {

@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS nodes
 (
     id       SERIAL PRIMARY KEY,
     nodeName TEXT UNIQUE,
-    username TEXT REFERENCES users (username)
+    username TEXT
 );
 
 CREATE TABLE IF NOT EXISTS statuses

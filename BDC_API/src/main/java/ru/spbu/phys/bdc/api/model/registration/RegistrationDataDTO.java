@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class RegistrationDataDTO {
     private String nodeName;
     private String username;
+    private Status status;
 }

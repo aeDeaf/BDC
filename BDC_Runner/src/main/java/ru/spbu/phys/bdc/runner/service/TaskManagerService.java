@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 public class TaskManagerService {
-    public static final String STATUS_URL = "http://localhost:8080/status";
-    public static final String CONTAINER_INFOS_URL = "http://localhost:8080/status";
+    public static final String STATUS_URL = "http://localhost:8090/command/status";
+    public static final String CONTAINER_INFOS_URL = "http://localhost:8090/command/status";
     public static final String GET_COMMAND_URL = "http://127.0.0.1:8090/command";
 
     private final Properties properties;

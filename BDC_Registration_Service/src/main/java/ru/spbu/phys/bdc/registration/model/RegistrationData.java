@@ -1,21 +1,15 @@
 package ru.spbu.phys.bdc.registration.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
+import ru.spbu.phys.bdc.api.model.registration.Status;
 
 @Data
 @Builder
 public class RegistrationData {
     private final String nodeName;
     @Builder.Default
-    private User user = null;
+    private String username = null;
 
-    @JsonIgnore
-    public String getUsername() {
-        if (user == null) {
-            return null;
-        }
-        return user.getUsername();
-    }
+    private Status status;
 }

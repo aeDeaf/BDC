@@ -11,6 +11,7 @@ public class RegistrationDataMapper {
                 .builder()
                 .nodeName(data.getNodeName())
                 .username(data.getUsername())
+                .status(data.getStatus())
                 .build();
     }
 }

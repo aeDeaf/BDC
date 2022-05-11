@@ -7,7 +7,9 @@ import ru.spbu.phys.bdc.api.model.registration.Status;
 import ru.spbu.phys.bdc.registration.mapper.RegistrationDataMapper;
 import ru.spbu.phys.bdc.registration.model.RegistrationData;
 import ru.spbu.phys.bdc.registration.repository.RegistrationDataRepository;
-import ru.spbu.phys.bdc.registration.repository.UserRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -15,13 +17,11 @@ public class RegistrationService {
     private static final String NODE_NAME_TEMPLATE = "node%d";
 
     private final RegistrationDataRepository registrationDataRepository;
-    private final UserRepository userRepository;
     private final RegistrationDataMapper registrationDataMapper;
     private final StatusService statusService;
 
-    public RegistrationService(RegistrationDataRepository registrationDataRepository, UserRepository userRepository, RegistrationDataMapper registrationDataMapper, StatusService statusService) {
+    public RegistrationService(RegistrationDataRepository registrationDataRepository, RegistrationDataMapper registrationDataMapper, StatusService statusService) {
         this.registrationDataRepository = registrationDataRepository;
-        this.userRepository = userRepository;
         this.registrationDataMapper = registrationDataMapper;
         this.statusService = statusService;
     }
@@ -44,16 +44,25 @@ public class RegistrationService {
     }
 
     public void registerService(String nodeName, String username) {
-        var user = userRepository.getUser(username);
-        if (user.isEmpty()) {
-            log.error("Can't find user with username {}", username);
-            throw new RuntimeException("Can't find user with username " + username);
-        }
         RegistrationData registrationData = RegistrationData
                 .builder()
                 .nodeName(nodeName)
-                .user(user.get())
+                .username(username)
                 .build();
         registrationDataRepository.saveRegistrationData(registrationData);
+    }
+
+    public List<RegistrationDataDTO> getNodesByUsername(String username) {
+        return registrationDataRepository.findNodesByUsername(username)
+                .stream()
+                .map(registrationDataMapper::map)
+                .collect(Collectors.toList());
+    }
+
+    public List<RegistrationDataDTO> getNodes() {
+        return registrationDataRepository.findNodes()
+                .stream()
+                .map(registrationDataMapper::map)
+                .collect(Collectors.toList());
     }
 }

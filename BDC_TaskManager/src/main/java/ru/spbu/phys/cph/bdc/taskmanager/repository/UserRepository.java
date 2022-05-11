@@ -1,12 +1,12 @@
-package ru.spbu.phys.bdc.registration.repository;
+package ru.spbu.phys.cph.bdc.taskmanager.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Component;
-import ru.spbu.phys.bdc.registration.model.User;
+import ru.spbu.phys.cph.bdc.taskmanager.model.user.Role;
+import ru.spbu.phys.cph.bdc.taskmanager.model.user.User;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -18,13 +18,12 @@ import java.util.Optional;
 @Component
 public class UserRepository extends JdbcDaoSupport {
     //language=SQL
-    private static final String GET_USER = "SELECT username FROM users WHERE username=?;";
+    private static final String FIND_USER_BY_USERNAME = "SELECT username, password, role FROM users_data WHERE username=?";
 
     private JdbcTemplate jdbcTemplate;
 
     private final DataSource dataSource;
 
-    @Autowired
     public UserRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -39,23 +38,22 @@ public class UserRepository extends JdbcDaoSupport {
         }
     }
 
-    public Optional<User> getUser(String username) {
+    public Optional<User> findUserByUsername(String username) {
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(GET_USER, this::userMapper, username));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_USER_BY_USERNAME, this::userMapper, username));
         } catch (EmptyResultDataAccessException e) {
-            log.warn("Can't find user {}", username);
             return Optional.empty();
         }
     }
 
     private User userMapper(ResultSet rs, int rowNum) {
         try {
-            return User
-                    .builder()
-                    .username(rs.getString("username"))
-                    .build();
+            String username = rs.getString("username");
+            String password = rs.getString("password");
+            Role role = Role.values()[rs.getInt("role")];
+            return new User(username, password, role);
         } catch (SQLException e) {
-            log.error("Can't create User object");
+            log.warn("Can't create user object");
             return null;
         }
     }

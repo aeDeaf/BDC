@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/bdc_runner
+    url: jdbc:postgresql://localhost:5432/bdc_taskmanager
     username: postgres
     password: postgres
 server:

@@ -1,4 +1,4 @@
-package ru.spbu.phys.cph.bdc.taskmanager.model;
+package ru.spbu.phys.cph.bdc.taskmanager.model.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

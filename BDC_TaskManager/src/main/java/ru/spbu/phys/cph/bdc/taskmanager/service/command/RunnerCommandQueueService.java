@@ -1,4 +1,4 @@
-package ru.spbu.phys.cph.bdc.taskmanager.service;
+package ru.spbu.phys.cph.bdc.taskmanager.service.command;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
