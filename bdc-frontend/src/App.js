@@ -1,12 +1,12 @@
 import './App.css';
 import Navbar from "./Navbar/Navbar";
-import ContainerTable from "./MainWindow/ContainersTable";
+import MainWindow from "./MainWindow/MainWindow";
 
 function App() {
     return (
         <div className="App">
             <Navbar/>
-            <ContainerTable/>
+            <MainWindow/>
         </div>
     );
 }

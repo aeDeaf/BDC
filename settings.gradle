@@ -4,4 +4,5 @@ include 'BDC_API'
 include 'BDC_TaskManagerMook'
 include 'BDC_TaskManager'
 include 'BDC_Registration_Service'
+include 'BDC_SettingsService'
 

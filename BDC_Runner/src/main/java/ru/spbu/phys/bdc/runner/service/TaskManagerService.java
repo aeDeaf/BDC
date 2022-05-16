@@ -3,9 +3,13 @@ package ru.spbu.phys.bdc.runner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import ru.spbu.phys.bdc.api.model.CommonResponse;
 import ru.spbu.phys.bdc.api.model.executor.RunnerCommand;
@@ -23,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class TaskManagerService {
     public static final String STATUS_URL = "http://localhost:8090/command/status";
-    public static final String CONTAINER_INFOS_URL = "http://localhost:8090/command/status";
+    public static final String CONTAINER_INFOS_URL = "http://localhost:8090/command/containers";
     public static final String GET_COMMAND_URL = "http://127.0.0.1:8090/command";
 
     private final Properties properties;
@@ -58,8 +62,8 @@ public class TaskManagerService {
                 observers
                         .forEach(observer -> observer.processCommand(command));
             }
-        } catch (RestClientException e) {
-            e.printStackTrace();
+        } catch (ResourceAccessException e) {
+            log.warn("Can't access task manager");
         }
     }
 

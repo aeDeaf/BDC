@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 command_queue = []
 
@@ -31,5 +34,27 @@ def show_status():
     return jsonify({'message': 'message'})
 
 
+@app.route('/frontend/containers', methods=['GET'])
+@cross_origin()
+def get_container_infos():
+    response = {
+        "dockerContainerInfos": [
+            {
+                "containerId": "726f5289afd9",
+                "image": "git.jinr.ru:5005/nica/docker-images/bmn:latest",
+                "status": "EXITED",
+                "name": "bmnroot3"
+            },
+            {
+                "containerId": "01040c7ba99a",
+                "image": "git.jinr.ru:5005/nica/docker-images/bmn:latest",
+                "status": "EXITED",
+                "name": "bmnroot4"
+            }
+        ]
+    }
+    return jsonify(response)
+
+
 if __name__ == '__main__':
-    app.run('0.0.0.0', 8001)
+    app.run('0.0.0.0', 8090)

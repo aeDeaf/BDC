@@ -1,8 +1,3 @@
-CREATE TABLE IF NOT EXISTS users
-(
-    username TEXT PRIMARY KEY
-);
-
 CREATE TABLE IF NOT EXISTS nodes
 (
     id       SERIAL PRIMARY KEY,

@@ -1,4 +1,4 @@
-package ru.spbu.phys.bdc.runner.repository;
+package ru.spbu.phys.bdc.settings.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -18,6 +19,9 @@ import java.util.Optional;
 public class ConfigurationRepository extends JdbcDaoSupport {
     //language=SQL
     private static final String FIND_PARAMETER_BY_KEY = "SELECT key, value FROM configuration WHERE key=?";
+
+    //language=SQL
+    private static final String FIND_PARAMETERS = "SELECT key, value FROM configuration;";
 
     //language=SQL
     private static final String SAVE_PARAMETER = """
@@ -48,6 +52,10 @@ public class ConfigurationRepository extends JdbcDaoSupport {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public List<ConfigurationParameter> findParameters() {
+        return jdbcTemplate.query(FIND_PARAMETERS, this::configurationParameterMapper);
     }
 
     public void saveParameter(ConfigurationParameter parameter) {

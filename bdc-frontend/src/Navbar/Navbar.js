@@ -23,7 +23,7 @@ export default function Navbar() {
 
     return (
         <Box>
-            <AppBar position="static">
+            <AppBar position="static" sx={{height: '60px'}}>
                 <Toolbar>
                     <IconButton
                         size="large"
