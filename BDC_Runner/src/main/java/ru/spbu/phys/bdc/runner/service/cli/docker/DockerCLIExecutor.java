@@ -1,12 +1,14 @@
 package ru.spbu.phys.bdc.runner.service.cli.docker;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.spbu.phys.bdc.runner.model.cli.Command;
 import ru.spbu.phys.bdc.runner.service.command.CommandsService;
 
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 public class DockerCLIExecutor {
     private final CommandsService commandsService;
@@ -111,8 +113,50 @@ public class DockerCLIExecutor {
         return exec(command);
     }
 
+    public CompletableFuture<String> copyBackupDataToHost(String containerName, String containerPath, String hostPath) {
+        Command command = Command
+                .createCommand()
+                .addCommand("docker")
+                .addCommand("cp")
+                .addCommand(containerName + ":" + containerPath)
+                .addCommand(hostPath);
+        return exec(command);
+    }
+
+    public CompletableFuture<String> copyBackupDataToContainer(String containerName, String containerPath, String hostPath) {
+        Command command = Command
+                .createCommand()
+                .addCommand("docker")
+                .addCommand("cp")
+                .addCommand(hostPath)
+                .addCommand(containerName + ":" + containerPath);
+        return exec(command);
+    }
+
+    public CompletableFuture<String> removeContainer(String containerName) {
+        Command command = Command
+                .createCommand()
+                .addCommand("docker")
+                .addCommand("rm")
+                .addCommand(containerName);
+        return exec(command);
+    }
+
+    public CompletableFuture<String> removeImage(String imageName) {
+        Command command = Command
+                .createCommand()
+                .addCommand("docker")
+                .addCommand("image")
+                .addCommand("rm")
+                .addCommand(imageName);
+        var res = new CompletableFuture<String>();
+        res.complete("");
+        return res;
+    }
+
     @SneakyThrows
     public CompletableFuture<String> exec(Command command) {
+        log.info("Executing command: {}", command.toString());
         return commandsService.addCommandToQueue(command);
     }
 }

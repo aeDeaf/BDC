@@ -10,21 +10,7 @@ import Paper from '@mui/material/Paper';
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import {Add, MoreVert, PlayArrow, Stop} from "@mui/icons-material";
-import {
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Fab,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    Tooltip
-} from "@mui/material";
+import {Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, Menu, MenuItem, Tooltip} from "@mui/material";
 import axios from "axios";
 
 const OpenDialogContext = React.createContext({
@@ -52,51 +38,65 @@ function getDockerContainerInfos(state, setState) {
         .get(dockerContainersInfosUrl)
         .then(response => {
             const data = response.data['dockerContainerInfos']
-            const r = []
-            const newState = {...state}
-            data.forEach(line => {
-                const status = line['status']
-                r.push(createData(line['name'], line['image'], status))
-                Object.keys(newState.circular)
-                    .forEach(name => {
-                        if (name === line['name']) {
-                            const circularData = newState.circular[name]
-                            if (status !== circularData.prevStatus) {
-                                newState.circular[name].inProgress = false
-                            }
-                        }
-                    })
-            })
-            newState.rows = r
-            setState(newState)
+            if (data !== []) {
+                const r = []
+                const newState = {...state}
+                data.forEach(line => {
+                    const status = line['status']
+                    r.push(createData(line['name'], line['image'], status))
+                })
+                const keys = Object.keys(newState.circular)
+                for (let i = 0; i < keys.length; i++) {
+                    if (newState.circular[keys[i]].stop) {
+                        setTimeout(() => {
+                            const s = {...state}
+                            s.circular[keys[i]].inProgress = false
+                            s.circular[keys[i]].stop = false
+                            setState(s)
+                        }, 3000)
+                    }
+                }
+                if (r !== []) {
+                    newState.rows = r
+                }
+                setState(newState)
+            }
         })
 }
 
 function sendGetDockerContainerInfosRequest() {
     return axios
         .post('http://localhost:8090/frontend', {
-            'nodeName': 'node2',
+            'nodeName': 'node4',
             'commandType': 6,
             'parameters': []
         })
 }
 
-function getStatusMessage() {
+function getStatusMessage(state, setState, updateMode, setUpdateMode) {
     const statusesURL = 'http://localhost:8090/frontend/status'
     axios
         .get(statusesURL)
         .then(response => {
             if (response.data !== '') {
-                sendGetDockerContainerInfosRequest()
-                    .then(() => console.log("Send docker container infos request"))
+                const containerName = response.data['message']
+                const newState = {...state}
+                newState.circular[containerName] = {
+                    inProgress: true,
+                    prevState: undefined,
+                    stop: true
+                }
+                setState(newState)
+                sendGetDockerContainerInfosRequest().then(() => console.log())
             }
         })
+
 }
 
 function sendRunCommand(state, setState, ev) {
     const [containerName, statusName] = ev.currentTarget.id.split(' ')
     const data = {
-        "nodeName": "node2",
+        "nodeName": "node4",
         "commandType": statusName !== 'UP' ? 2 : 3,
         "parameters": [
             {
@@ -111,9 +111,35 @@ function sendRunCommand(state, setState, ev) {
             const prevStatus = state.rows.filter(row => row['containerName'] === containerName)[0].statusName
             newState.circular[containerName] = {
                 inProgress: true,
-                'prevStatus': prevStatus
+                'prevStatus': prevStatus,
+                stop: false
             }
             setState(newState)
+        })
+}
+
+function sendUpdateCommand(state, setState, anchor, setUpdateMode) {
+    const containerName = anchor.id
+    const data = {
+        "nodeName": "node4",
+        "commandType": 5,
+        "parameters": [
+            {
+                "name": "containerName",
+                "value": containerName
+            }
+        ]
+    }
+    axios.post('http://localhost:8090/frontend', data)
+        .then(() => {
+            const newState = {...state}
+            const prevStatus = state.rows.filter(row => row['containerName'] === containerName)[0].statusName
+            newState.circular[containerName] = {
+                inProgress: true,
+                'prevStatus': prevStatus,
+            }
+            setState(newState)
+            setUpdateMode(true)
         })
 }
 
@@ -124,17 +150,36 @@ export default function ContainerTable() {
     })
 
     const [open, setIsDialogOpen] = useState(false)
+    const [anchorEl, setAnchorEl] = useState(null)
+    const [updateMode, setUpdateMode] = useState(false)
     const value = {open, setIsDialogOpen}
 
     useEffect(() => {
         sendGetDockerContainerInfosRequest()
             .then(() => console.log("Send docker container infos request"))
         const id = setInterval(() => {
-            getStatusMessage()
+            getStatusMessage(state, setState, getUpdateMode, setUpdateMode)
             getDockerContainerInfos(state, setState)
         }, 3000)
         return () => clearInterval(id)
     }, [])
+
+    const handleMenuOpenBtnClick = (ev) => {
+        setAnchorEl(ev.currentTarget)
+    }
+
+    const handleMenuClose = () => {
+        setAnchorEl(null)
+    }
+
+    const handleUpdateClick = () => {
+        sendUpdateCommand(state, setState, anchorEl, setUpdateMode)
+        handleMenuClose()
+    }
+
+    const getUpdateMode = () => {
+        return updateMode
+    }
 
     if (state.rows !== undefined) {
         return (
@@ -180,7 +225,7 @@ export default function ContainerTable() {
                                                 }
                                             </IconButton>
                                         </Tooltip>
-                                        <IconButton>
+                                        <IconButton id={row.containerName} onClick={handleMenuOpenBtnClick}>
                                             <MoreVert/>
                                         </IconButton>
                                     </TableCell>
@@ -196,6 +241,9 @@ export default function ContainerTable() {
                         </Fab>
                     </Tooltip>
                 </div>
+                <Menu open={Boolean(anchorEl)} anchorEl={anchorEl} onClose={handleMenuClose}>
+                    <MenuItem onClick={handleUpdateClick}>Обновить</MenuItem>
+                </Menu>
                 <OpenDialogContext.Provider value={value}>
                     <AddContainerDialog/>
                 </OpenDialogContext.Provider>
@@ -230,22 +278,10 @@ function AddContainerDialog() {
     return (
         <Dialog open={open} fullWidth={true} onClose={() => setIsDialogOpen(false)}>
             <DialogTitle>Добавить контейнер</DialogTitle>
-            <DialogContentText>
-
-            </DialogContentText>
-            <DialogContent style={{marginTop: '5px'}}>
-                <FormControl fullWidth>
-                    <InputLabel>Выберите тип:</InputLabel>
-                    <Select
-                        label='Выберите тип:'
-                        fullWidth={true}
-                        value={value}
-                        onChange={handleChange}
-                    >
-                        <MenuItem value={'gpu'}>GPU версия</MenuItem>
-                        <MenuItem value={'noGPU'}>Версия без GPU</MenuItem>
-                    </Select>
-                </FormControl>
+            <DialogContent>
+                <DialogContentText>
+                    <Typography>Cоздать новый контейнер?</Typography>
+                </DialogContentText>
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => setIsDialogOpen(false)}>Отмена</Button>
@@ -257,7 +293,7 @@ function AddContainerDialog() {
 
 function sendCreateContainerRequest() {
     const data = {
-        "nodeName": "node2",
+        "nodeName": "node4",
         "commandType": 1,
         "parameters": [
             {

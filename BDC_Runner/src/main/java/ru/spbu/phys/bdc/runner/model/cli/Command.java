@@ -26,4 +26,9 @@ public class Command {
     public List<String> build() {
         return commands;
     }
+
+    @Override
+    public String toString() {
+        return String.join(" ", build());
+    }
 }

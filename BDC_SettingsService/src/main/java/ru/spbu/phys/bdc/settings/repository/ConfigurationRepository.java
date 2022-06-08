@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Component;
 import ru.spbu.phys.bdc.api.model.settings.ConfigurationParameter;
+import ru.spbu.phys.bdc.api.model.settings.ModuleConfigurationParameter;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -21,12 +22,18 @@ public class ConfigurationRepository extends JdbcDaoSupport {
     private static final String FIND_PARAMETER_BY_KEY = "SELECT key, value FROM configuration WHERE key=?";
 
     //language=SQL
+    private static final String FIND_PARAMETERS_BY_MODULE_NAME = "SELECT id, module_name, key, value FROM configuration WHERE module_name=?";
+
+    //language=SQL
     private static final String FIND_PARAMETERS = "SELECT key, value FROM configuration;";
 
     //language=SQL
     private static final String SAVE_PARAMETER = """
-            INSERT INTO configuration (key, value) VALUES (?, ?)
-            ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value;""";
+            INSERT INTO configuration (module_name, key, value) VALUES (null, ?, ?)""";
+
+    //language=SQL
+    private static final String UPDATE_PARAMETER = """
+            UPDATE configuration SET value=? WHERE key=?;""";
 
     private JdbcTemplate jdbcTemplate;
 
@@ -58,8 +65,16 @@ public class ConfigurationRepository extends JdbcDaoSupport {
         return jdbcTemplate.query(FIND_PARAMETERS, this::configurationParameterMapper);
     }
 
+    public List<ModuleConfigurationParameter> findModuleParameterByModuleName(String moduleName) {
+        return jdbcTemplate.query(FIND_PARAMETERS_BY_MODULE_NAME, this::moduleConfigurationParameterMapper, moduleName);
+    }
+
     public void saveParameter(ConfigurationParameter parameter) {
         jdbcTemplate.update(SAVE_PARAMETER, parameter.key(), parameter.value());
+    }
+
+    public void updateParameter(ConfigurationParameter parameter) {
+        jdbcTemplate.update(UPDATE_PARAMETER, parameter.value(), parameter.key());
     }
 
     private ConfigurationParameter configurationParameterMapper(ResultSet rs, int rowNum) {
@@ -67,6 +82,19 @@ public class ConfigurationRepository extends JdbcDaoSupport {
             String key = rs.getString("key");
             String value = rs.getString("value");
             return new ConfigurationParameter(key, value);
+        } catch (SQLException e) {
+            log.error("Can't create configuration parameter");
+            return null;
+        }
+    }
+
+    private ModuleConfigurationParameter moduleConfigurationParameterMapper(ResultSet rs, int rowNum) {
+        try {
+            Long id = rs.getLong("id");
+            String moduleName = rs.getString("module_name");
+            String key = rs.getString("key");
+            String value = rs.getString("value");
+            return new ModuleConfigurationParameter(id, moduleName, key, value);
         } catch (SQLException e) {
             log.error("Can't create configuration parameter");
             return null;

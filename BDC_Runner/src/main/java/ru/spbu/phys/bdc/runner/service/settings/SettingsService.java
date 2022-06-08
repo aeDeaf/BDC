@@ -9,11 +9,13 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.spbu.phys.bdc.api.model.settings.ConfigurationParameter;
+import ru.spbu.phys.bdc.api.model.settings.ModuleParameters;
 
 @Slf4j
 @Service
 public class SettingsService {
     private static final String PARAMETER_URL = "http://localhost:8081/configuration";
+    private static final String MODULES_URL = "http://localhost:8081/configuration/module";
 
     private final RestTemplate restTemplate;
 
@@ -25,6 +27,11 @@ public class SettingsService {
     public ConfigurationParameter getParameterByKey(String key) {
         String url = PARAMETER_URL + "/" + key;
         return restTemplate.getForObject(url, ConfigurationParameter.class);
+    }
+
+    public ModuleParameters getModuleParametersByKey(String moduleName) {
+        String url = MODULES_URL + "/" + moduleName;
+        return restTemplate.getForObject(url, ModuleParameters.class);
     }
 
     public void saveParameter(ConfigurationParameter parameter) {

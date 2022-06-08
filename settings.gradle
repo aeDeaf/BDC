@@ -1,4 +1,4 @@
-rootProject.name = 'bmnMook'
+rootProject.name = 'BDC'
 include 'BDC_Runner'
 include 'BDC_API'
 include 'BDC_TaskManagerMook'

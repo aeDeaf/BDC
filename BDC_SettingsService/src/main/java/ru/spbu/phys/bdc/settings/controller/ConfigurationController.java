@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.spbu.phys.bdc.api.model.settings.ConfigurationParameter;
+import ru.spbu.phys.bdc.api.model.settings.ModuleParameters;
 import ru.spbu.phys.bdc.settings.service.ConfigurationService;
 
 @RestController
@@ -26,6 +27,12 @@ public class ConfigurationController {
     private ResponseEntity<ConfigurationParameter> findParameterByKey(@PathVariable String key) {
         var parameter = configurationService.findParameterByKey(key);
         return new ResponseEntity<>(parameter, HttpStatus.OK);
+    }
+
+    @GetMapping("/module/{name}")
+    private ResponseEntity<ModuleParameters> findModuleParametersByModuleName(@PathVariable String name) {
+        var moduleParameters = configurationService.findParametersByModuleName(name);
+        return new ResponseEntity<>(moduleParameters, HttpStatus.OK);
     }
 
     @PostMapping

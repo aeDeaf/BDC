@@ -24,8 +24,10 @@ public class ContainerRepository extends JdbcDaoSupport {
             "SELECT id, container_name, image_name, username, password FROM containers WHERE container_name=?;";
 
     //language=SQL
-    public static final String SAVE_CONTAINER =
-            "INSERT INTO containers (container_name, image_name, username, password) VALUES (?, ?, ?, ?)";
+    public static final String SAVE_CONTAINER = """
+            INSERT INTO containers (container_name, image_name, username, password) VALUES (?, ?, ?, ?)
+            ON CONFLICT (container_name) DO UPDATE
+            SET image_name=EXCLUDED.image_name, username=EXCLUDED.username, password=EXCLUDED.password""";
 
     private JdbcTemplate jdbcTemplate;
 

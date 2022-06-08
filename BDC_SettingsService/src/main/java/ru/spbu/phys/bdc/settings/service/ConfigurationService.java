@@ -3,6 +3,7 @@ package ru.spbu.phys.bdc.settings.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.spbu.phys.bdc.api.model.settings.ConfigurationParameter;
+import ru.spbu.phys.bdc.api.model.settings.ModuleParameters;
 import ru.spbu.phys.bdc.api.model.settings.Settings;
 import ru.spbu.phys.bdc.settings.repository.ConfigurationRepository;
 
@@ -24,12 +25,18 @@ public class ConfigurationService {
                 });
     }
 
+    public ModuleParameters findParametersByModuleName(String moduleName) {
+        return new ModuleParameters(configurationRepository.findModuleParameterByModuleName(moduleName));
+    }
+
     public Settings findSettings() {
         return new Settings(configurationRepository.findParameters());
     }
 
     public void saveParameter(ConfigurationParameter parameter) {
-        configurationRepository.saveParameter(parameter);
+        configurationRepository.findParameterByKey(parameter.key())
+                .ifPresentOrElse(p -> configurationRepository.updateParameter(parameter),
+                        () -> configurationRepository.saveParameter(parameter));
     }
 
     public void saveSettings(Settings settings) {
