@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import ru.spbu.phys.bdc.api.model.settings.ConfigurationParameter;
 import ru.spbu.phys.bdc.api.model.settings.ModuleParameters;
@@ -26,7 +27,17 @@ public class SettingsService {
 
     public ConfigurationParameter getParameterByKey(String key) {
         String url = PARAMETER_URL + "/" + key;
-        return restTemplate.getForObject(url, ConfigurationParameter.class);
+        try {
+            return restTemplate.getForObject(url, ConfigurationParameter.class);
+        } catch (ResourceAccessException e) {
+            try {
+                Thread.sleep(3000);
+                return restTemplate.getForObject(url, ConfigurationParameter.class);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+
+        }
     }
 
     public ModuleParameters getModuleParametersByKey(String moduleName) {

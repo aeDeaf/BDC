@@ -33,7 +33,7 @@ function createData(containerName, imageName, statusName) {
 
 
 function getDockerContainerInfos(state, setState) {
-    const dockerContainersInfosUrl = 'http://localhost:8090/frontend/containers'
+    const dockerContainersInfosUrl = 'http://localhost:8090/frontend/containers?timestamp=' + new Date().getTime()
     axios
         .get(dockerContainersInfosUrl)
         .then(response => {
@@ -66,15 +66,15 @@ function getDockerContainerInfos(state, setState) {
 
 function sendGetDockerContainerInfosRequest() {
     return axios
-        .post('http://localhost:8090/frontend', {
-            'nodeName': 'node4',
+        .post('http://localhost:8090/frontend?timestamp=' + new Date().getTime(), {
+            'nodeName': 'node1',
             'commandType': 6,
             'parameters': []
         })
 }
 
 function getStatusMessage(state, setState, updateMode, setUpdateMode) {
-    const statusesURL = 'http://localhost:8090/frontend/status'
+    const statusesURL = 'http://localhost:8090/frontend/status?timestamp=' + new Date().getTime()
     axios
         .get(statusesURL)
         .then(response => {
@@ -96,7 +96,7 @@ function getStatusMessage(state, setState, updateMode, setUpdateMode) {
 function sendRunCommand(state, setState, ev) {
     const [containerName, statusName] = ev.currentTarget.id.split(' ')
     const data = {
-        "nodeName": "node4",
+        "nodeName": "node1",
         "commandType": statusName !== 'UP' ? 2 : 3,
         "parameters": [
             {
@@ -105,7 +105,7 @@ function sendRunCommand(state, setState, ev) {
             }
         ]
     }
-    axios.post('http://localhost:8090/frontend', data)
+    axios.post('http://localhost:8090/frontend?timestamp=' + new Date().getTime(), data)
         .then(() => {
             const newState = {...state}
             const prevStatus = state.rows.filter(row => row['containerName'] === containerName)[0].statusName
@@ -121,7 +121,7 @@ function sendRunCommand(state, setState, ev) {
 function sendUpdateCommand(state, setState, anchor, setUpdateMode) {
     const containerName = anchor.id
     const data = {
-        "nodeName": "node4",
+        "nodeName": "node1",
         "commandType": 5,
         "parameters": [
             {
@@ -130,7 +130,7 @@ function sendUpdateCommand(state, setState, anchor, setUpdateMode) {
             }
         ]
     }
-    axios.post('http://localhost:8090/frontend', data)
+    axios.post('http://localhost:8090/frontend?timestamp=' + new Date().getTime(), data)
         .then(() => {
             const newState = {...state}
             const prevStatus = state.rows.filter(row => row['containerName'] === containerName)[0].statusName
@@ -293,7 +293,7 @@ function AddContainerDialog() {
 
 function sendCreateContainerRequest() {
     const data = {
-        "nodeName": "node4",
+        "nodeName": "node1",
         "commandType": 1,
         "parameters": [
             {
